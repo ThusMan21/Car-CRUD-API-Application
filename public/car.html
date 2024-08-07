@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Management API</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>C/\R CRUD Application</h1>
+
+   
+    <div>
+        <h2>Add a New Car</h2>
+        <form id="addCarForm">
+            <input type="text" id="color" placeholder="Color" required>
+            <input type="text" id="make" placeholder="Make" required>
+            <input type="text" id="model" placeholder="Model" required>
+            <input type="text" id="reg_number" placeholder="Registration Number" required>
+            <button type="submit">Add Car</button>
+        </form>
+    </div>
+
+    
+    <div>
+        <h2>Delete a Car</h2>
+        <form id="deleteCarForm">
+            <input type="text" id="deleteRegNumber" placeholder="Registration Number" required>
+            <button type="submit">Delete Car</button>
+        </form>
+    </div>
+
+    
+    <div>
+        <h2>All Cars</h2>
+        <button onclick="fetchCars()">Refresh Cars List</button>
+        <ul id="carList"></ul>
+    </div>
+
+    
+    <div>
+        <h2>Most Popular Car Make</h2>
+        <button onclick="fetchMostPopularMake()">Find Most Popular Make</button>
+        <p id="mostPopularMake"></p>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        document.getElementById('addCarForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const color = document.getElementById('color').value;
+            const make = document.getElementById('make').value;
+            const model = document.getElementById('model').value;
+            const reg_number = document.getElementById('reg_number').value;
+
+            try {
+                await axios.post(`${API_URL}/cars`, { color, make, model, reg_number });
+                alert('Car added successfully');
+                fetchCars();
+            } catch (error) {
+                alert('Error adding car: ' + error.response.data.message);
+            }
+        });
+
+        document.getElementById('deleteCarForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const reg_number = document.getElementById('deleteRegNumber').value;
+
+            try {
+                await axios.delete(`${API_URL}/cars/${reg_number}`);
+                alert('Car deleted successfully');
+                fetchCars();
+            } catch (error) {
+                alert('Error deleting car: ' + error.response.data.message);
+            }
+        });
+
+        async function fetchCars() {
+            try {
+                const response = await axios.get(`${API_URL}/cars`);
+                const carList = document.getElementById('carList');
+                carList.innerHTML = '';
+
+                response.data.forEach(car => {
+                    const li = document.createElement('li');
+                    li.textContent = `Make: ${car.make}, Model: ${car.model}, Color: ${car.color}, Registration Number: ${car.reg_number}`;
+                    carList.appendChild(li);
+                });
+            } catch (error) {
+                alert('Error fetching cars: ' + error.message);
+            }
+        }
+
+        async function fetchMostPopularMake() {
+            try {
+                const response = await axios.get(`${API_URL}/mostPopularMake`);
+                document.getElementById('mostPopularMake').textContent = `Most Popular Make: ${response.data.mostPopularMake}`;
+            } catch (error) {
+                alert('Error fetching most popular make: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
